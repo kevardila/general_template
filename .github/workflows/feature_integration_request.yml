@@ -1,0 +1,32 @@
+---
+# This workflow will be execute when the dev team create a pull request from some "feat" branch to development branch (just the PR creation).
+# This process verify that the code run unit tests and verify if the code compile successfully.
+# this workflows is the only guarantee for team leader to aprove the PR.
+name: Feature integration request for Java
+
+# NOTE: Be careful not to modify this block to follow the guidelines.
+# Modifying them may disrupt CI/CD flows.
+on:
+  pull_request:
+    branches:
+      - development
+
+env:
+  JAVA_VERSION: 17
+  JAVA_DISTRIBUTION: 'temurin'
+  COVERAGE: 80
+
+jobs:
+  run_unit_tests:
+    uses: bvcco/lab_devops_templates/.github/workflows/CI-unit_testing-java.yml@development
+    with:
+      java-version: $JAVA_VERSION
+      distribution: $JAVA_DISTRIBUTION
+      coverage: $COVERAGE
+
+  run_compilation_check:
+    uses: bvcco/lab_devops_templates/.github/workflows/CI-build-java.yml@development
+    with:
+      java-version: $JAVA_VERSION
+      distribution: $JAVA_DISTRIBUTION
+
