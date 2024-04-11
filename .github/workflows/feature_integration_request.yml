@@ -1,7 +1,7 @@
 ---
 # This workflow will be execute when the dev team create a pull request from some "feat" branch to development branch (just the PR creation).
 # This process verify that the code run unit tests and verify if the code compile successfully.
-# this workflows is the only guarantee for team leader to aprove the PR.
+# this workflows is the only integrtion code guarantee for team leader to aprove the PR.
 name: Feature integration request for Java
 
 # NOTE: Be careful not to modify this block to follow the guidelines.
