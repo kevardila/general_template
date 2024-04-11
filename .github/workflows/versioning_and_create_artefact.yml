@@ -1,0 +1,48 @@
+---
+# This workflow will be execute when the leader team aprove a pull request from some feat branches to development.
+# All process depends of the merge will be successfully.
+# This workflow compiles the project, builds artifact, builds kaniko image and push it to harbor.
+name: Feature integration request for Java
+
+# NOTE: Be careful not to modify this block to follow the guidelines.
+# Modifying them may disrupt CI/CD flows.
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - development
+
+env:
+  JAVA_VERSION: 17
+  JAVA_DISTRIBUTION: temurin
+  REGISTRY_REPOSITORY: test-devops
+  NODE_VERSION: temurin
+
+jobs:
+  get_variables:
+    runs-on: ubuntu-latest
+    outputs:
+      java_version: ${{steps.variables.outputs.java_version}}
+      java_distribution: ${{steps.variables.outputs.java_distribution}}
+      registry_repository: ${{steps.variables.outputs.registry_repository}}
+      node_version: ${{steps.variables.outputs.node_version}}
+    steps:
+      - name: get variables
+        id: variables
+        run: |
+          echo "java_version=$(echo "$JAVA_VERSION")" >> $GITHUB_OUTPUT
+          echo "java_distribution=$(echo "$JAVA_DISTRIBUTION")" >> $GITHUB_OUTPUT
+          echo "registry_repository=$(echo "$REGISTRY_REPOSITORY")" >> $GITHUB_OUTPUT
+          echo "node_version=$(echo "$NODE_VERSION")" >> $GITHUB_OUTPUT
+
+  build_and_versioning_artifact:
+    needs: get_variables
+    uses: bvcco/lab_devops_templates/.github/workflows/CD-deployment_build-java.yml@development
+    with:
+      java_version: ${{needs.get_variables.outputs.java_version}}
+      distribution: ${{needs.get_variables.outputs.java_distribution}}
+      registry_repository: ${{needs.get_variables.outputs.registry_repository}}
+      node_version: ${{needs.get_variables.outputs.node_version}}
+
+
