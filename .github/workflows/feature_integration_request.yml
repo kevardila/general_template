@@ -1,0 +1,35 @@
+---
+# This workflow will be execute when the leader team aprove a pull request from some feat branches to development.
+# This workflow runs unit testing and checks the code coverage.
+name: Feature integration request for Java
+
+# NOTE: Be careful not to modify this block to follow the guidelines.
+# Modifying them may disrupt CI/CD flows.
+on:
+  pull_request:
+    branches:
+      - development
+
+env:
+  NODE_VERSION: 18
+  COVERAGE: 80
+
+jobs:
+  get_variables:
+    runs-on: ubuntu-latest
+    outputs:
+      node_version: ${{steps.variables.outputs.node_version}}
+      coverage: ${{steps.variables.outputs.coverage}}
+    steps:
+      - name: get variables
+        id: variables
+        run: |
+          echo "node_version=$(echo "$NODE_VERSION")" >> $GITHUB_OUTPUT
+          echo "coverage=$(echo "$COVERAGE")" >> $GITHUB_OUTPUT
+
+  run_unit_tests:
+    needs: get_variables
+    uses: bvcco/lab_devops_templates/.github/workflows/CI-unit_testing-nodejs.yml@development
+    with:
+      node-version: ${{needs.get_variables.outputs.node_version}}
+      coverage: ${{needs.get_variables.outputs.coverage}}

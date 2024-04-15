@@ -1,0 +1,20 @@
+{
+    "name": "Project_name",
+    "version": "0.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js",
+        "test": "set NODE_OPTIONS=--experimental-vm-modules & npx jest --coverage --coverageDirectory=\"./output/code-coverage\" --coverageReporters=json-summary"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "supertest": "^6.3.4"
+    }
+}

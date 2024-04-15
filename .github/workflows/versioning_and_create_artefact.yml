@@ -1,0 +1,44 @@
+---
+# This workflow will be execute when the leader team aprove a pull request from some feat branches to development.
+# All process depends of the merge will be successfully.
+# This workflow builds kaniko image and push it to harbor.
+name: Feature integration request for Java
+
+# NOTE: Be careful not to modify this block to follow the guidelines.
+# Modifying them may disrupt CI/CD flows.
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - development
+
+env:
+    NODE_VERSION: 18
+
+jobs:
+  get_variables:
+    runs-on: ubuntu-latest
+    outputs:
+      node_version: ${{steps.variables.outputs.node_version}}
+    steps:
+      - name: get variables
+        id: variables
+        run: |
+          echo "node_version=$(echo "$NODE_VERSION")" >> $GITHUB_OUTPUT
+
+  build_artifact:
+    needs: get_variables
+    uses: bvcco/lab_devops_templates/.github/workflows/CI-deployment_build-node.yml@development
+    with:
+      node_version: ${{needs.get_variables.outputs.node_version}}
+
+  harbor-label:
+    needs: build_artifact
+    uses: bvcco/lab_devops_templates/.github/workflows/Utils-assign_label-harbor.yml@development
+    secrets: inherit
+    with:
+      tag: ${{needs.build_artifact.outputs.tag}}
+      project: 'test-devops'
+      repository: 'node-artifact'
+      label: 'development'
