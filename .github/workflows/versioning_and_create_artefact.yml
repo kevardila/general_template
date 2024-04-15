@@ -34,7 +34,7 @@ jobs:
       node_version: ${{needs.get_variables.outputs.node_version}}
 
   harbor-label:
-    needs: build_artifact
+    needs: [build_artifact, get_variables]
     uses: bvcco/lab_devops_templates/.github/workflows/Utils-assign_label-harbor.yml@development
     secrets: inherit
     with:
