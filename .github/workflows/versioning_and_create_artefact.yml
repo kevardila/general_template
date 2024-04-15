@@ -1,44 +1,46 @@
----
-# This workflow will be execute when the leader team aprove a pull request from some feat branches to development.
-# All process depends of the merge will be successfully.
-# This workflow builds kaniko image and push it to harbor.
-name: Feature integration request for Java
+name: node Build & Publish Artifact
 
-# NOTE: Be careful not to modify this block to follow the guidelines.
-# Modifying them may disrupt CI/CD flows.
 on:
   pull_request_target:
     types:
       - closed
     branches:
-      - development
+      - node_app
 
 env:
-    NODE_VERSION: 18
+  NODE_VERSION: 18
+  # Harbor information
+  REPOSITORY: node-artifact
+  PROJECT: test-devops
 
 jobs:
   get_variables:
     runs-on: ubuntu-latest
     outputs:
       node_version: ${{steps.variables.outputs.node_version}}
+      repository: ${{steps.variables.outputs.repository}}
+      project: ${{steps.variables.outputs.project}}
     steps:
       - name: get variables
         id: variables
         run: |
-          echo "node_version=$(echo "$NODE_VERSION")" >> $GITHUB_OUTPUT
+          echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
+          echo "repository=$REPOSITORY" >> $GITHUB_OUTPUT
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
 
-  build_artifact:
+  build_ci:
     needs: get_variables
     uses: bvcco/lab_devops_templates/.github/workflows/CI-deployment_build-node.yml@development
+    secrets: inherit
     with:
       node_version: ${{needs.get_variables.outputs.node_version}}
 
   harbor-label:
-    needs: [build_artifact, get_variables]
+    needs: [build_ci, get_variables]
     uses: bvcco/lab_devops_templates/.github/workflows/Utils-assign_label-harbor.yml@development
     secrets: inherit
     with:
-      tag: ${{needs.build_artifact.outputs.tag}}
-      project: 'test-devops'
-      repository: 'node-artifact'
+      tag: ${{needs.build_ci.outputs.tag}}
+      project: ${{needs.get_variables.outputs.project}}
+      repository: ${{needs.get_variables.outputs.repository}}
       label: 'development'
