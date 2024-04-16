@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - node_app
+      - development
 
 env:
   NODE_VERSION: 18
