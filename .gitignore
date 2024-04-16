@@ -4,19 +4,3 @@
 .idea/
 .vsdoce/
 
-# Also, some frameworks create folders with project configurations or built code which is not necessary upload to repository
-# Some examples could be:
-# node_modules/ (For node)
-# dist/ (For java)
-# build/ (For java)
-
-# Devops definitions give dockerfiles by default, if the developer create dockerfiles for test on his local computer
-# those files should be ignored. But, the dockerfiless given by devops definition dosen't supply the proyect necessities 
-# you can ignore this part.
-# Dockerfile
-
-# Finally, Any github repository shouldn't has any binary files like images, videos, etc.
-# For example:
-# assets/
-# logo.png
-# welcome.mp4
