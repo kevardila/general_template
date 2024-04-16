@@ -1,58 +1,47 @@
 ---
-name: Java Maven Build & Publish Artifact
+# This workflow will be execute when the dev team create a pull request from some "feat" branch to development branch (just the PR creation).
+# This process verify that the code run unit tests and verify if the code compile successfully.
+# this workflows is the only integrtion code guarantee for team leader to aprove the PR.
+name: Feature integration request for Java
 
+# NOTE: Be careful not to modify this block to follow the guidelines.
+# Modifying them may disrupt CI/CD flows.
 on:
-  pull_request_target:
-    types:
-      - closed
+  pull_request:
     branches:
       - development
 
 env:
   JAVA_VERSION: 17
-  DISTRIBUTION: temurin
-  NODE_VERSION: 18
-  # harbor information
-  REGISTRY_REPOSITORY: jar-artifact
-  REGISTRY_PROJECT: test-devops
+  JAVA_DISTRIBUTION: temurin
+  COVERAGE: 80
 
 jobs:
-
   get_variables:
-    runs-on: ubuntu-latest
     outputs:
-      java_version: ${{steps.variables.outputs.java_version}}
-      node_version: ${{steps.variables.outputs.node_version}}
-      registry_repository: ${{steps.variables.outputs.registry_repository}}
-      distribution: ${{steps.variables.outputs.distribution}}
-      registry_project: ${{steps.variables.outputs.registry_project}}
+        java_version: ${{steps.variables.outputs.java_version}}
+        java_distribution: ${{steps.variables.outputs.java_distribution}}
+        coverage: ${{steps.variables.outputs.coverage}}
+    runs-on: ubuntu-latest
     steps:
       - name: get variables
         id: variables
         run: |
-          echo "java_version=$JAVA_VERSION" >> $GITHUB_OUTPUT
-          echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
-          echo "registry_repository=$REGISTRY_REPOSITORY" >> $GITHUB_OUTPUT
-          echo "distribution=$DISTRIBUTION" >> $GITHUB_OUTPUT
-          echo "registry_project=$REGISTRY_PROJECT" >> $GITHUB_OUTPUT
+          echo "java_version=$(echo "$JAVA_VERSION")" >> $GITHUB_OUTPUT
+          echo "java_distribution=$(echo "$JAVA_DISTRIBUTION")" >> $GITHUB_OUTPUT
+          echo "coverage=$(echo "$COVERAGE")" >> $GITHUB_OUTPUT
 
-  build_ci:
+  run_unit_tests:
     needs: get_variables
-    uses: bvcco/lab_devops_templates/.github/workflows/CD-deployment_build-java.yml@development
-    secrets: inherit
+    uses: bvcco/lab_devops_templates/.github/workflows/CI-unit_testing-java.yml@development
     with:
-      java_version: ${{needs.get_variables.outputs.java_version}}
-      distribution: ${{needs.get_variables.outputs.distribution}}
-      node_version: ${{needs.get_variables.outputs.node_version}}
-      registry_repository: ${{needs.get_variables.outputs.registry_repository}}
-      registry_project: ${{needs.get_variables.outputs.registry_project}}
+      java-version: ${{needs.get_variables.outputs.java_version}}
+      distribution: ${{needs.get_variables.outputs.java_distribution}}
+      coverage: ${{needs.get_variables.outputs.coverage}}
 
-  harbor-label:
-    needs: [build_ci, get_variables]
-    uses: bvcco/lab_devops_templates/.github/workflows/Utils-assign_label-harbor.yml@development
-    secrets: inherit
+  run_compilation_check:
+    needs: get_variables
+    uses: bvcco/lab_devops_templates/.github/workflows/CI-build-java.yml@development
     with:
-      tag: ${{needs.build_ci.outputs.tag}}
-      project: ${{needs.get_variables.outputs.registry_project}}
-      repository: ${{needs.get_variables.outputs.registry_repository}}
-      label: 'development'
+      java-version: ${{needs.get_variables.outputs.java_version}}
+      distribution: ${{needs.get_variables.outputs.java_distribution}}
